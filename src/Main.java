@@ -13,121 +13,132 @@ class Node {
 class ArvoreBinaria {
     Node raiz;
 
-    // Inserir elemento
+    private Node inserirRaiz(Node novo,int valor){
+        if (novo == null){
+            System.out.println("Node "+valor+" criado");
+            return new Node(valor, null,null);
+        }
+        if (valor < novo.info) {
+            System.out.println("Indo para a Esquerda");
+            novo.esquerda = inserirRaiz(novo.esquerda, valor);
+        } else if (valor > novo.info) {
+            System.out.println("Indo para a Direita");
+            novo.direita = inserirRaiz(novo.direita, valor);
+        }
+        return novo;
+    }
+
     public void inserir(int valor) {
-        raiz = inserirRec(raiz, valor);
+        raiz = inserirRaiz(raiz, valor);
     }
 
-    private Node inserirRec(Node atual, int valor) {
-        if (atual == null) {
-            return new Node(valor, null, null);
+    private Node removerRaizMaior(Node removedor){
+        if (removedor == null) {
+            System.out.println("Sem Node criado");
+            return null;
         }
-        if (valor < atual.info) {
-            atual.esquerda = inserirRec(atual.esquerda, valor);
-        } else if (valor > atual.info) {
-            atual.direita = inserirRec(atual.direita, valor);
+        if(removedor.direita == null){
+            return  removedor.esquerda;
         }
-        // Se valor igual, não insere (não permite duplicatas)
-        return atual;
+        removedor.direita = removerRaizMaior(removedor.direita);
+        return removedor;
     }
 
-    // Remover o maior elemento
-    public void removerMaior() {
-        raiz = removerMaiorRec(raiz);
+    public void removerMaior(){
+        System.out.println("Remomendo o Maior elemento");
+        raiz = removerRaizMaior(raiz);
     }
 
-    private Node removerMaiorRec(Node atual) {
-        if (atual == null) return null;
-        if (atual.direita == null) {
-            return atual.esquerda;
+    private Node removerRaizMenor(Node removedor){
+        if (removedor == null){
+            System.out.println("Sem Node criado");
+            return null;
         }
-        atual.direita = removerMaiorRec(atual.direita);
-        return atual;
-    }
-
-    // Remover o menor elemento
-    public void removerMenor() {
-        raiz = removerMenorRec(raiz);
-    }
-
-    private Node removerMenorRec(Node atual) {
-        if (atual == null) return null;
-        if (atual.esquerda == null) {
-            return atual.direita;
+        if (removedor.esquerda == null){
+            return removedor.direita;
         }
-        atual.esquerda = removerMenorRec(atual.esquerda);
-        return atual;
+        removedor.esquerda = removerRaizMenor(removedor.esquerda);
+        return removedor;
     }
 
-    // Remover um elemento específico N
-    public void remover(int valor) {
-        raiz = removerRec(raiz, valor);
+    public void removerMenor(){
+        System.out.println("Removendo o menor Elemento");
+        raiz = removerRaizMenor(raiz);
     }
 
-    private Node removerRec(Node atual, int valor) {
-        if (atual == null) return null;
-
-        if (valor < atual.info) {
-            atual.esquerda = removerRec(atual.esquerda, valor);
-        } else if (valor > atual.info) {
-            atual.direita = removerRec(atual.direita, valor);
-        } else {
-            // Encontrou o nó a ser removido
-            if (atual.esquerda == null) return atual.direita;
-            if (atual.direita == null) return atual.esquerda;
-
-            // Dois filhos: substitui pelo menor da subárvore direita
-            Node sucessor = encontrarMenor(atual.direita);
-            atual.info = sucessor.info;
-            atual.direita = removerRec(atual.direita, sucessor.info);
+    private Node descobrirMenor(Node escolhido){
+        while (escolhido.esquerda != null){
+            escolhido = escolhido.esquerda;
         }
-        return atual;
+        return escolhido;
     }
 
-    private Node encontrarMenor(Node atual) {
-        while (atual.esquerda != null) {
-            atual = atual.esquerda;
+    private Node removerElemento(Node escolhido, int valor){
+        if (escolhido == null) {
+            System.out.println("Sem Node criado");
+            return null;
         }
-        return atual;
+        if (valor < escolhido.info){
+            escolhido.esquerda = removerElemento(escolhido.esquerda,valor);}
+        if (valor > escolhido.info){
+            escolhido.direita = removerElemento(escolhido.direita, valor);}
+        else {
+            if (escolhido.esquerda == null)
+                return  escolhido.direita;
+            if (escolhido.direita == null)
+                return  escolhido.esquerda;
+
+            // substituie os filhos??
+            Node filho = descobrirMenor(escolhido.direita);
+            escolhido.info = filho.info;
+            escolhido.direita = removerElemento(escolhido.direita, filho.info);
+        }
+        return escolhido;
     }
 
-    // Opcional: imprimir em ordem para ver a árvore
-    public void imprimirEmOrdem() {
-        imprimirEmOrdemRec(raiz);
+    public void imprimirOrdem(){
+        descobrirOrdem(raiz);
         System.out.println();
     }
 
-    private void imprimirEmOrdemRec(Node atual) {
-        if (atual != null) {
-            imprimirEmOrdemRec(atual.esquerda);
-            System.out.print(atual.info + " ");
-            imprimirEmOrdemRec(atual.direita);
+    private void descobrirOrdem(Node ordem){
+        if (ordem != null){
+            descobrirOrdem(ordem.esquerda);
+            System.out.print(ordem.info + " ");
+            descobrirOrdem(ordem.direita);
         }
+    }
+
+    public void remover(int elemento){
+        System.out.println("Removendo o elemento "+elemento);
+        raiz = removerElemento(raiz,elemento);
     }
 }
 
 public class Main {
     public static void main(String[] args) {
         ArvoreBinaria arvore = new ArvoreBinaria();
-        int[] valores = {14, 15, 4, 9, 7, 18, 3, 5, 16, 20, 17, 5};
 
-        for (int v : valores) {
-            arvore.inserir(v);
+        int[] valores = {13,15,9,4,3,7,18,20,5,17};
+        for (int i : valores){
+            arvore.inserir(i);
+            System.out.println("Adicionando na arvore elemento:"+i);
         }
-
-        System.out.print("Árvore original: ");
-        arvore.imprimirEmOrdem();
+        System.out.print("Imprimindo arvore Original: ");
+        arvore.imprimirOrdem();
 
         arvore.removerMaior();
-        System.out.print("Após remover maior: ");
-        arvore.imprimirEmOrdem();
+        System.out.print("Imprimindo Arvore apos remover o Maior: ");
+        arvore.imprimirOrdem();
 
         arvore.removerMenor();
-        System.out.print("Após remover menor: ");
-        arvore.imprimirEmOrdem();
+        System.out.print("Imprimindo Arvore apos remoover o Menor");
+        arvore.imprimirOrdem();
 
         arvore.remover(9);
-        System.out.print("Após remover 9: ");
-        arvore.imprimirEmOrdem();
+        arvore.remover(17);
+        System.out.print("Apos remover os elementos: ");
+        arvore.imprimirOrdem();
+
     }
 }
